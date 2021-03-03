@@ -18,10 +18,12 @@ The time will be printed on the console.
 ## Measuring time between trigger and two feedbacks
 
 ```python
-ct = critical_time.CritialTime()
-A_us, B_us = ct.measure_times_us()
-print(f'Time between trigger output and edge A/B  was {A_us}/{B_us} us')
+ZERO1_us, TRIP_us, ZERO2_us = ct.measure_times_us(timeout_us = 5e6) # maximum timeout 2e9 us
 ```
 
-A output pin will trigger a process which then will trigger edge A and edge B.
-The time between trigger and edge A and B will be printed to the console.
+Opto Fets are used to start the slope.
+Times are measured in us:
+- first crossing of 0V: ZERO1_us
+- Trip of supraconductive device: TRIP_us
+Opto Fets are set to go back to the start voltge
+- secont crossing of 0V: ZERO2_us
