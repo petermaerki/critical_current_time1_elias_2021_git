@@ -7,7 +7,7 @@ def main():
     button_ms = ct.measure_button_ms()
     print(f'Time between yellow led and button pressed was {button_ms} ms')
 
-    A_us, B_us = ct.measure_times_us()
+    A_us, B_us = ct.measure_times_us(timeout_us = 5e6)
     print(f'Time between trigger output and edge A/B  was {A_us}/{B_us} us')
 
 if __name__ == "__main__":

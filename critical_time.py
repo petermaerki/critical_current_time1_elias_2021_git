@@ -31,8 +31,8 @@ class CritialTime:
         time_ms = eval(ret)
         return time_ms
 
-    def measure_times_us(self):
-        cmd = f'mp_critical_time.singleton.measure_times_us()'
+    def measure_times_us(self, timeout_us=5e6):
+        cmd = f'mp_critical_time.singleton.measure_times_us(timeout_us={timeout_us})'
         ret = self._eval(cmd)
         A_us, B_us = eval(ret)
         return A_us, B_us

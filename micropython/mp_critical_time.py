@@ -25,16 +25,22 @@ class MpCriticalTime:
         self.start_ms = pyb.millis()
 
         while (self.button_ms is None) and (pyb.elapsed_millis(self.start_ms) < 5000):
-            pyb.delay(100)
+            pyb.delay(100) # ms
 
         self._yellow.off()
         return self.button_ms
 
-    def measure_times_us(self):
+    def measure_times_us(self, timeout_us = 5e6):
         self.A_us = None
         self.B_us = None
+
+        self._pinA.enable()
+        # fet ansteuern
         self.start_us = pyb.micros()
-        pyb.delay(5)
+
+        while ((self.A_us is None) or (self.B_us is None)) and (pyb.elapsed_micros(self.start_us) < timeout_us):
+            pyb.delay(1) # ms
+
         return self.A_us, self.B_us
 
     def _button_pressed(self):
@@ -44,8 +50,10 @@ class MpCriticalTime:
 
     def _pinA_callback(self):
         self.A_us = pyb.elapsed_micros(self.start_us)
+        self._pinA.disable()
 
     def _pinB_callback(self):
         self.B_us = pyb.elapsed_micros(self.start_us)
+        self._pinB.disable()
 
 singleton = MpCriticalTime()
