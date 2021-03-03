@@ -32,9 +32,12 @@ class CritialTime:
         return time_ms
 
     def measure_times_us(self, timeout_us=5e6):
-        cmd = f'mp_critical_time.singleton.measure_times_us(timeout_us={timeout_us})'
+        cmd = f'mp_critical_time.singleton.measure_times_us(timeout_us={int(timeout_us)})'
         ret = self._eval(cmd)
-        A_us, B_us = eval(ret)
+        try:
+            A_us, B_us = eval(ret)
+        except SyntaxError as ex:
+            raise Exception(f'Micropython "{cmd}" -> "{ret}" ({ex})') from ex
         return A_us, B_us
 
     def _eval(self, cmd):

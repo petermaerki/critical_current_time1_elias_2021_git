@@ -1,4 +1,6 @@
 import pyb
+import micropython
+micropython.alloc_emergency_exception_buf(100)
 
 class MpCriticalTime:
     def __init__(self):
@@ -7,17 +9,27 @@ class MpCriticalTime:
         self._yellow = pyb.LED(3)
         self._button = pyb.Switch()
         self._button.callback(self._button_pressed)
+
+        self.opto_fet_R = pyb.Pin(pyb.Pin.board.Y10, pyb.Pin.OUT_PP)
+        self.opto_fet_S = pyb.Pin(pyb.Pin.board.Y12, pyb.Pin.OUT_PP)
         # PA0, PB0, PC0, PD0, etc all connect to line 0.
         # PA1, PB1, PC1, PD1, etc all connect to line 1.
         # etc
         # PA15, PB15, PC15, PD15 all connect to line 15.
-        self._pinA = pyb.ExtInt(pyb.Pin.board.X1, pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_UP, self._pinA_callback)
-        self._pinB = pyb.ExtInt(pyb.Pin.board.X2, pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_UP, self._pinB_callback)
+        #self._pinZERO = pyb.ExtInt(pyb.Pin.board.X1, pyb.ExtInt.IRQ_RISING_FALLING, pyb.Pin.PULL_NONE , self._pinZERO_callback)
+        #self._pinTRIP = pyb.ExtInt(pyb.Pin.board.X2, pyb.ExtInt.IRQ_RISING_FALLING, pyb.Pin.PULL_NONE , self._pinTRIP_callback)
+        self._pinZERO = pyb.ExtInt(pyb.Pin.board.X1, pyb.ExtInt.IRQ_RISING, pyb.Pin.PULL_NONE , self._pinZERO_callback)
+        self._pinTRIP = pyb.ExtInt(pyb.Pin.board.X2, pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_NONE , self._pinTRIP_callback)
+        self.reset()
     
     def reset(self):
         self._red.off()
         self._green.off()
         self._yellow.off()
+        self.opto_fet_R.value(1)
+        self.opto_fet_S.value(0)
+        self._pinZERO.disable()
+        self._pinTRIP.disable()
 
     def measure_button_ms(self):
         self.button_ms = None
@@ -31,29 +43,34 @@ class MpCriticalTime:
         return self.button_ms
 
     def measure_times_us(self, timeout_us = 5e6):
-        self.A_us = None
-        self.B_us = None
+        self.ZERO_us = None
+        self.TRIP_us = None
 
-        self._pinA.enable()
-        # fet ansteuern
+        # opto_fet, start slope
+        self.opto_fet_R.value(0)
+        pyb.delay(1) # ms   make shure R is open
+        self.opto_fet_S.value(1) # slope starts
         self.start_us = pyb.micros()
+        self._pinZERO.enable()
+        self._pinTRIP.enable()
 
-        while ((self.A_us is None) or (self.B_us is None)) and (pyb.elapsed_micros(self.start_us) < timeout_us):
+        while ((self.ZERO_us is None) or (self.TRIP_us is None)) and (pyb.elapsed_micros(self.start_us) < timeout_us):
             pyb.delay(1) # ms
 
-        return self.A_us, self.B_us
+        self.reset()
+        return self.ZERO_us, self.TRIP_us
 
     def _button_pressed(self):
         self.button_ms = pyb.elapsed_millis(self.start_ms)
         self._yellow.off()
         self._green.on()
 
-    def _pinA_callback(self):
-        self.A_us = pyb.elapsed_micros(self.start_us)
-        self._pinA.disable()
+    def _pinZERO_callback(self, _line):
+        self.ZERO_us = pyb.elapsed_micros(self.start_us)
+        self._pinZERO.disable()
 
-    def _pinB_callback(self):
-        self.B_us = pyb.elapsed_micros(self.start_us)
-        self._pinB.disable()
+    def _pinTRIP_callback(self, _line):
+        self.TRIP_us = pyb.elapsed_micros(self.start_us)
+        self._pinTRIP.disable()
 
 singleton = MpCriticalTime()
