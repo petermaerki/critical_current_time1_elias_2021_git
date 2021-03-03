@@ -19,7 +19,8 @@ if mp.version.FULL < REQUIRED_MPFSHELL_VERSION:
 
 class CritialTime:
     def __init__(self):
-        self._board = pyboard_query.ConnectPyboard(hwtype=None)
+        self._board = pyboard_query.ConnectPyboard(hwtype='critical_time')
+        #self._board = pyboard_query.ConnectComport('COM5')
 
         self._board.mpfshell.sync_folder(DIRECTORY_OF_THIS_FILE / 'micropython')
         self._exec('import mp_critical_time')
