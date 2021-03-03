@@ -16,10 +16,8 @@ class MpCriticalTime:
         # PA1, PB1, PC1, PD1, etc all connect to line 1.
         # etc
         # PA15, PB15, PC15, PD15 all connect to line 15.
-        #self._pinZERO = pyb.ExtInt(pyb.Pin.board.X1, pyb.ExtInt.IRQ_RISING_FALLING, pyb.Pin.PULL_NONE , self._pinZERO_callback)
-        #self._pinTRIP = pyb.ExtInt(pyb.Pin.board.X2, pyb.ExtInt.IRQ_RISING_FALLING, pyb.Pin.PULL_NONE , self._pinTRIP_callback)
-        self._pinZERO = pyb.ExtInt(pyb.Pin.board.X1, pyb.ExtInt.IRQ_RISING, pyb.Pin.PULL_NONE , self._pinZERO_callback)
-        self._pinTRIP = pyb.ExtInt(pyb.Pin.board.X2, pyb.ExtInt.IRQ_FALLING, pyb.Pin.PULL_NONE , self._pinTRIP_callback)
+        self._pinZERO = pyb.ExtInt(pyb.Pin.board.X1, pyb.ExtInt.IRQ_RISING_FALLING, pyb.Pin.PULL_NONE , self._pinZERO_callback)
+        self._pinTRIP = pyb.ExtInt(pyb.Pin.board.X2, pyb.ExtInt.IRQ_RISING_FALLING, pyb.Pin.PULL_NONE , self._pinTRIP_callback)
         self.reset()
     
     def reset(self):
@@ -43,8 +41,9 @@ class MpCriticalTime:
         return self.button_ms
 
     def measure_times_us(self, timeout_us = 5e6):
-        self.ZERO_us = None
+        self.ZERO1_us = None
         self.TRIP_us = None
+        self.ZERO2_us = None
 
         # opto_fet, start slope
         self.opto_fet_R.value(0)
@@ -52,13 +51,13 @@ class MpCriticalTime:
         self.opto_fet_S.value(1) # slope starts
         self.start_us = pyb.micros()
         self._pinZERO.enable()
-        self._pinTRIP.enable()
 
-        while ((self.ZERO_us is None) or (self.TRIP_us is None)) and (pyb.elapsed_micros(self.start_us) < timeout_us):
+
+        while ((self.ZERO1_us is None) or (self.TRIP_us is None) or (self.ZERO2_us is None)) and (pyb.elapsed_micros(self.start_us) < timeout_us):
             pyb.delay(1) # ms
 
         self.reset()
-        return self.ZERO_us, self.TRIP_us
+        return self.ZERO1_us, self.TRIP_us, self.ZERO2_us,
 
     def _button_pressed(self):
         self.button_ms = pyb.elapsed_millis(self.start_ms)
@@ -66,11 +65,23 @@ class MpCriticalTime:
         self._green.on()
 
     def _pinZERO_callback(self, _line):
-        self.ZERO_us = pyb.elapsed_micros(self.start_us)
-        self._pinZERO.disable()
+        us = pyb.elapsed_micros(self.start_us)
+        if self.ZERO1_us == None: # first time
+            self.ZERO1_us = us
+            self._pinZERO.disable()
+            #self._pinZERO.regs()  # dump register values
+            self._pinTRIP.enable()
+        if (self.ZERO1_us and self.TRIP_us) and (self.ZERO2_us == None):
+            self.ZERO2_us = us
+            self._pinZERO.disable()
+
 
     def _pinTRIP_callback(self, _line):
-        self.TRIP_us = pyb.elapsed_micros(self.start_us)
+        us = pyb.elapsed_micros(self.start_us)
+        if self.TRIP_us == None:
+            self.TRIP_us = us
         self._pinTRIP.disable()
+        self._pinZERO.enable()  
+
 
 singleton = MpCriticalTime()

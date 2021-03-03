@@ -36,10 +36,10 @@ class CritialTime:
         cmd = f'mp_critical_time.singleton.measure_times_us(timeout_us={int(timeout_us)})'
         ret = self._eval(cmd)
         try:
-            A_us, B_us = eval(ret)
+            ZERO1_us, TRIP_us, ZERO2_us = eval(ret)
         except SyntaxError as ex:
             raise Exception(f'Micropython "{cmd}" -> "{ret}" ({ex})') from ex
-        return A_us, B_us
+        return ZERO1_us, TRIP_us, ZERO2_us
 
     def _eval(self, cmd):
         return self._board.mpfshell.MpFileExplorer.eval(cmd)

@@ -10,12 +10,13 @@ def main():
         print(f'Time between yellow led and button pressed was {button_ms} ms')
 
     for i in range(20):
-        ZERO_us, TRIP_us = ct.measure_times_us(timeout_us = 5e6) # maximum timeout 2e9 us
+        ZERO1_us, TRIP_us, ZERO2_us = ct.measure_times_us(timeout_us = 5e6) # maximum timeout 2e9 us
         diff_us = 0
-        if ZERO_us and TRIP_us:
-            diff_us = TRIP_us - ZERO_us
-        print(f'Time between slope start and ZERO: {ZERO_us} and TRIP: {TRIP_us}. Difference: {diff_us} ')
-
+        if ZERO1_us and TRIP_us and ZERO2_us:
+            diff_us = TRIP_us - ZERO1_us # this is the relevant time for Elias
+            print(f'Time between slope start and ZERO1_us: {ZERO1_us} and TRIP_us: {TRIP_us}. Difference: {diff_us}. ZERO2_us: {ZERO2_us}')
+        else:
+            print(f'Something went wrong. ZERO1_us: {ZERO1_us}, TRIP_us: {TRIP_us},  ZERO2_us: {ZERO2_us}')
 
 if __name__ == "__main__":
     main()
