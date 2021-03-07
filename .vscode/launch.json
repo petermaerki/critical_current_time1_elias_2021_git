@@ -15,8 +15,8 @@
       "name": "Python: run_main.py",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/run_main.py",
-      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/software/run_main.py",
+      "cwd": "${workspaceFolder}/software",
       "justMyCode": true,
       "console": "integratedTerminal"
     }

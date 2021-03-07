@@ -12,11 +12,12 @@ def main():
     for i in range(20):
         ZERO1_us, TRIP_us, ZERO2_us = ct.measure_times_us(timeout_us = 5e6) # maximum timeout 2e9 us
         diff_us = 0
-        if ZERO1_us and TRIP_us and ZERO2_us:
-            diff_us = TRIP_us - ZERO1_us # this is the relevant time for Elias
-            print(f'Time between slope start and ZERO1_us: {ZERO1_us} and TRIP_us: {TRIP_us}. Difference: {diff_us}. ZERO2_us: {ZERO2_us}')
-        else:
-            print(f'Something went wrong. ZERO1_us: {ZERO1_us}, TRIP_us: {TRIP_us},  ZERO2_us: {ZERO2_us}')
+        if (ZERO1_us is None) or (TRIP_us is None) or (ZERO2_us is None):
+            print(f'Timeout. ZERO1_us: {ZERO1_us}, TRIP_us: {TRIP_us},  ZERO2_us: {ZERO2_us}')
+            continue
+
+        diff_us = TRIP_us - ZERO1_us # this is the relevant time for Elias
+        print(f'Time between slope start and ZERO1_us: {ZERO1_us} and TRIP_us: {TRIP_us}. Difference: {diff_us}. ZERO2_us: {ZERO2_us}')
 
 if __name__ == "__main__":
     main()
