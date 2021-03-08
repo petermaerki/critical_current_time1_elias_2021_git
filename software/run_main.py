@@ -9,7 +9,7 @@ def main():
         button_ms = ct.measure_button_ms()
         print(f'Time between yellow led and button pressed was {button_ms} ms')
 
-    for i in range(20):
+    for i in range(1):
         ZERO1_us, TRIP_us, ZERO2_us = ct.measure_times_us(timeout_us = 5e6) # maximum timeout 2e9 us
         diff_us = 0
         if (ZERO1_us is None) or (TRIP_us is None) or (ZERO2_us is None):

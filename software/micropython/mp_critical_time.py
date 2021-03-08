@@ -10,8 +10,8 @@ class MpCriticalTime:
         self._button = pyb.Switch()
         self._button.callback(self._button_pressed)
 
-        self.opto_fet_R = pyb.Pin(pyb.Pin.board.Y10, pyb.Pin.OUT_PP)
-        self.opto_fet_S = pyb.Pin(pyb.Pin.board.Y12, pyb.Pin.OUT_PP)
+        self.opto_fet_R = pyb.Pin(pyb.Pin.board.X6, pyb.Pin.OUT_PP)
+        self.opto_fet_S = pyb.Pin(pyb.Pin.board.X4, pyb.Pin.OUT_PP)
         # PA0, PB0, PC0, PD0, etc all connect to line 0.
         # PA1, PB1, PC1, PD1, etc all connect to line 1.
         # etc
@@ -81,7 +81,9 @@ class MpCriticalTime:
         if self.TRIP_us == None:
             self.TRIP_us = us
         self._pinTRIP.disable()
-        self._pinZERO.enable()  
+        self._pinZERO.enable() 
+        self.opto_fet_R.value(1)
+        self.opto_fet_S.value(0)
 
 
 singleton = MpCriticalTime()
